@@ -40,7 +40,14 @@ First stub of the ViMi Pad database field.
 
 - The value area is a plain-text field carrying the serialised map. The
   interactive editor embed (a ViMi Pad transport bound to the field value) is
-  the next step.## 0.1.3 - 2026-08-10
+  the next step.## 0.1.4 - 2026-08-10
+
+### Added
+- Behat scenario (tests/behat/field.feature): a ViMi Pad field created via the
+  generator is listed in the database field management. Fills the previously
+  empty behat CI job.
+
+## 0.1.3 - 2026-08-10
 
 ### Fixed
 - The embedded editor now receives the profile form config (via the new
