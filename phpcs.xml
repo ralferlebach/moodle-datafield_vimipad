@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<ruleset name="datafield_vimipad">
+    <description>PHPCS configuration for datafield_vimipad.</description>
+    <rule ref="moodle"/>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+</ruleset>

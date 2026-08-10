@@ -1,0 +1,17 @@
+# Distribution rules for `git archive` (the GitHub release tarball/zip).
+#
+# Principle: the released package is the plugin Moodle runs — no development,
+# CI or internal-documentation machinery.
+
+# --- Never distribute: repository and CI plumbing -------------------------
+/.github            export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore
+/phpcs.xml          export-ignore
+
+# --- Never distribute: internal documentation -----------------------------
+# README.md and CHANGELOG.md ship (top level); working notes do not.
+/docs               export-ignore
+
+# Everything not listed above ships — including tests/, which are useful to
+# maintainers, plugin review and distribution QA.

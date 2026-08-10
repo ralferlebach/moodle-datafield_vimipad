@@ -25,11 +25,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'datafield_vimipad';
-$plugin->version      = 2026081000;
+$plugin->version      = 2026081001;
 $plugin->requires     = 2024100700;   // Moodle 4.5.0 — hard minimum, mirrors mod_vimipad.
 $plugin->supported    = [405, 502];   // Tested on Moodle 4.5–5.2, like the activity it depends on.
 $plugin->maturity     = MATURITY_ALPHA;
-$plugin->release      = '0.1.0';
+$plugin->release      = '0.1.1';
 
 // A ViMi Pad database field embeds the shared editor as the value of a database
 // activity entry. It reuses the public API (\mod_vimipad\profile\*) and the

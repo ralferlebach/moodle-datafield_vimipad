@@ -4,6 +4,18 @@ All notable changes to datafield_vimipad are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project adheres to
 semantic-ish plain patch numbering.
 
+## 0.1.1 - 2026-08-10
+
+### Fixed
+- Added the missing `fieldtypelabel` language string; the field edit page no
+  longer shows the raw `[[fieldtypelabel]]` placeholder.
+- The field now ships and renders its own type icon (via an `image()` override),
+  so the ViMi Pad glyph appears next to the field name in the field list and on
+  the field edit page.
+
+### Changed
+- Field-type icon redrawn as a neutral monochrome glyph.
+
 ## 0.1.0 — 2026-08-10
 
 First stub of the ViMi Pad database field.

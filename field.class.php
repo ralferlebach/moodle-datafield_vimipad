@@ -53,6 +53,21 @@ class data_field_vimipad extends data_field_base {
     }
 
     /**
+     * The field-type icon, served from this plugin instead of mod_data core.
+     *
+     * The base implementation resolves the icon inside mod_data
+     * ({@see \data_field_base::image()}); overriding it lets the subplugin
+     * ship its own glyph, which is what renders next to the field name on the
+     * field management and edit pages.
+     *
+     * @return string The rendered icon HTML.
+     */
+    public function image() {
+        global $OUTPUT;
+        return $OUTPUT->pix_icon('icon', $this->type, 'datafield_vimipad');
+    }
+
+    /**
      * Render the value-entry control shown to the user adding/editing an entry.
      *
      * @param int $recordid The record being edited (0 for a new record).

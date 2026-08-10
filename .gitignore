@@ -1,0 +1,7 @@
+# Composer / CI scratch
+/vendor/
+/ci/
+/moodle/
+# OS / editor cruft
+.DS_Store
+*.swp
