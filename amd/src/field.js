@@ -33,8 +33,9 @@
  * @param {string} inputId The id of the hidden input carrying the map value.
  * @param {string} profile The diagram profile to constrain the map to.
  * @param {string} formconfigJson The profile form config (JSON) from mod_vimipad.
+ * @param {boolean} readonly Whether the value is shown view-only (browse mode).
  */
-export const init = (containerId, inputId, profile, formconfigJson) => {
+export const init = (containerId, inputId, profile, formconfigJson, readonly) => {
     const container = document.getElementById(containerId);
     const input = document.getElementById(inputId);
     if (!container || !input) {
@@ -55,6 +56,7 @@ export const init = (containerId, inputId, profile, formconfigJson) => {
                 input.value = valuejson;
             },
             profile: profile,
+            readonly: readonly === true,
             formconfig: formconfig,
             getString: (key) => {
                 const store = window.M && window.M.str && window.M.str.mod_vimipad;

@@ -116,7 +116,7 @@ class data_field_vimipad extends data_field_base {
         global $PAGE;
         $formconfig = json_encode(\mod_vimipad\profile\profiles::form_config($profile));
         $PAGE->requires->js_call_amd('datafield_vimipad/field', 'init', [
-            $containerid, $inputid, $profile, $formconfig,
+            $containerid, $inputid, $profile, $formconfig, false,
         ]);
 
         return html_writer::div($hidden . $container . $noscript, 'datafield_vimipad');
@@ -189,7 +189,38 @@ class data_field_vimipad extends data_field_base {
         if ($content === false || trim((string)$content) === '') {
             return '';
         }
-        return html_writer::div(s(self::map_summary($content)), 'datafield_vimipad_browse');
+
+        global $PAGE;
+        $baseid = 'field_' . $this->field->id . '_r' . (int) $recordid;
+        $inputid = $baseid . '_value';
+        $containerid = $baseid . '_editor';
+        $profile = self::clamp_profile($this->field->param1);
+
+        // Read-only browse: no name (not submitted); the editor renders the map.
+        $hidden = html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'id' => $inputid,
+            'value' => (string) $content,
+        ]);
+        $container = html_writer::tag('div', '', [
+            'id' => $containerid,
+            'class' => 'datafield_vimipad_editor datafield_vimipad_browse',
+            'style' => 'min-height:360px;',
+            'data-profile' => $profile,
+        ]);
+        // No-JS fallback: the plain-text summary.
+        $noscript = html_writer::tag(
+            'noscript',
+            html_writer::div(s(self::map_summary($content)), 'datafield_vimipad_browse')
+        );
+
+        $this->preload_editor_strings();
+        $formconfig = json_encode(\mod_vimipad\profile\profiles::form_config($profile));
+        $PAGE->requires->js_call_amd('datafield_vimipad/field', 'init', [
+            $containerid, $inputid, $profile, $formconfig, true,
+        ]);
+
+        return html_writer::div($hidden . $container . $noscript, 'datafield_vimipad');
     }
 
     /**

@@ -40,7 +40,14 @@ First stub of the ViMi Pad database field.
 
 - The value area is a plain-text field carrying the serialised map. The
   interactive editor embed (a ViMi Pad transport bound to the field value) is
-  the next step.## 0.1.4 - 2026-08-10
+  the next step.## 0.1.5 - 2026-08-10
+
+### Added
+- Browsing a database entry now renders the stored map as a read-only embedded
+  editor (mod_vimipad mountValue, readonly) instead of a text summary; the plain
+  summary remains as a no-JS <noscript> fallback. Covered by a new PHPUnit test.
+
+## 0.1.4 - 2026-08-10
 
 ### Added
 - Behat scenario (tests/behat/field.feature): a ViMi Pad field created via the
