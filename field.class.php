@@ -114,8 +114,9 @@ class data_field_vimipad extends data_field_base {
 
         $this->preload_editor_strings();
         global $PAGE;
+        $formconfig = json_encode(\mod_vimipad\profile\profiles::form_config($profile));
         $PAGE->requires->js_call_amd('datafield_vimipad/field', 'init', [
-            $containerid, $inputid, $profile,
+            $containerid, $inputid, $profile, $formconfig,
         ]);
 
         return html_writer::div($hidden . $container . $noscript, 'datafield_vimipad');

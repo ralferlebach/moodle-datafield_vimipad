@@ -32,12 +32,20 @@
  * @param {string} containerId The id of the element to mount the editor into.
  * @param {string} inputId The id of the hidden input carrying the map value.
  * @param {string} profile The diagram profile to constrain the map to.
+ * @param {string} formconfigJson The profile form config (JSON) from mod_vimipad.
  */
-export const init = (containerId, inputId, profile) => {
+export const init = (containerId, inputId, profile, formconfigJson) => {
     const container = document.getElementById(containerId);
     const input = document.getElementById(inputId);
     if (!container || !input) {
         return;
+    }
+
+    let formconfig;
+    try {
+        formconfig = formconfigJson ? JSON.parse(formconfigJson) : undefined;
+    } catch (e) {
+        formconfig = undefined;
     }
 
     require(['mod_vimipad/editor_lazy'], (editor) => {
@@ -47,6 +55,7 @@ export const init = (containerId, inputId, profile) => {
                 input.value = valuejson;
             },
             profile: profile,
+            formconfig: formconfig,
             getString: (key) => {
                 const store = window.M && window.M.str && window.M.str.mod_vimipad;
                 return store && store[key] !== undefined ? store[key] : undefined;
