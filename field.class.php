@@ -90,28 +90,55 @@ class data_field_vimipad extends data_field_base {
         }
 
         $fieldid = 'field_' . $this->field->id;
+        $inputid = $fieldid . '_value';
+        $containerid = $fieldid . '_editor';
         $profile = self::clamp_profile($this->field->param1);
 
-        $label = html_writer::tag(
-            'label',
-            s($this->field->name),
-            ['for' => $fieldid, 'class' => 'accesshide']
-        );
-        $textarea = html_writer::tag('textarea', s($content), [
-            'id' => $fieldid,
+        // Hidden value field carrying the serialised map; the editor mirrors edits into it.
+        $hidden = html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'id' => $inputid,
             'name' => $fieldid,
-            'rows' => 6,
-            'class' => 'form-control datafield_vimipad_value',
-            'data-profile' => $profile,
-            'spellcheck' => 'false',
+            'value' => $content,
         ]);
-        $hint = html_writer::tag(
-            'div',
-            get_string('stubhint', 'datafield_vimipad', $profile),
-            ['class' => 'datafield_vimipad_stubhint text-muted']
+        $container = html_writer::tag('div', '', [
+            'id' => $containerid,
+            'class' => 'datafield_vimipad_editor',
+            'style' => 'min-height:480px;',
+            'data-profile' => $profile,
+        ]);
+        $noscript = html_writer::tag(
+            'noscript',
+            html_writer::tag('div', get_string('noscript', 'datafield_vimipad'), ['class' => 'text-muted'])
         );
 
-        return html_writer::div($label . $textarea . $hint, 'datafield_vimipad');
+        $this->preload_editor_strings();
+        global $PAGE;
+        $PAGE->requires->js_call_amd('datafield_vimipad/field', 'init', [
+            $containerid, $inputid, $profile,
+        ]);
+
+        return html_writer::div($hidden . $container . $noscript, 'datafield_vimipad');
+    }
+
+    /**
+     * Preload the mod_vimipad editor language strings so the embedded editor
+     * resolves them, without hard-coding the key list in this plugin.
+     *
+     * @return void
+     */
+    protected function preload_editor_strings() {
+        global $PAGE;
+        $strings = get_string_manager()->load_component_strings('mod_vimipad', current_language());
+        $keys = [];
+        foreach (array_keys($strings) as $key) {
+            if (strpos($key, 'editor:') === 0 || strpos($key, 'constraint:') === 0) {
+                $keys[] = $key;
+            }
+        }
+        if ($keys) {
+            $PAGE->requires->strings_for_js($keys, 'mod_vimipad');
+        }
     }
 
     /**

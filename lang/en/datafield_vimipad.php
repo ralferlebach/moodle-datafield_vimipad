@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['fieldtypelabel'] = 'ViMi Pad';
 $string['mapsummary'] = 'Map with {$a->nodes} node(s) and {$a->relations} relation(s)';
+$string['noscript'] = 'This field needs JavaScript enabled to build the map.';
 $string['pluginname'] = 'ViMi Pad';
 $string['privacy:metadata'] = 'The ViMi Pad database field stores no personal data of its own. The map is stored by the database activity in core-owned tables.';
 $string['profile'] = 'Diagram profile';

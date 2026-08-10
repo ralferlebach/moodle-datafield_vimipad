@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['fieldtypelabel'] = 'ViMi Pad';
 $string['mapsummary'] = 'Map mit {$a->nodes} Knoten und {$a->relations} Relation(en)';
+$string['noscript'] = 'Dieses Feld benötigt aktiviertes JavaScript, um die Map zu erstellen.';
 $string['pluginname'] = 'ViMi Pad';
 $string['privacy:metadata'] = 'Das ViMi-Pad-Datenbankfeld speichert selbst keine personenbezogenen Daten. Die Map wird von der Datenbank-Aktivität in kerneigenen Tabellen gespeichert.';
 $string['profile'] = 'Diagrammprofil';
