@@ -40,7 +40,23 @@ First stub of the ViMi Pad database field.
 
 - The value area is a plain-text field carrying the serialised map. The
   interactive editor embed (a ViMi Pad transport bound to the field value) is
-  the next step.## 0.1.5 - 2026-08-10
+  the next step.## 0.1.7 - 2026-08-10
+
+### Changed
+- Browse view mounts the read-only editor lazily (IntersectionObserver): each
+  entry's editor is created only when it scrolls near the viewport, keeping
+  entry lists with many ViMi Pad fields light. The editable add/edit form still
+  mounts immediately. Falls back to an immediate mount where IntersectionObserver
+  is unavailable.
+
+## 0.1.6 - 2026-08-10
+
+### Fixed
+- Behat: tagged tests/behat/field.feature with the plugin-type tag @datafield so
+  moodle-plugin-ci validate passes (it requires @datafield in addition to
+  @datafield_vimipad).
+
+## 0.1.5 - 2026-08-10
 
 ### Added
 - Browsing a database entry now renders the stored map as a read-only embedded

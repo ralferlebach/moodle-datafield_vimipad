@@ -1,4 +1,4 @@
-@mod @mod_data @datafield_vimipad
+@datafield @datafield_vimipad
 Feature: A teacher can add a ViMi Pad field to a database activity
   In order to collect visual knowledge maps as entries
   As a teacher

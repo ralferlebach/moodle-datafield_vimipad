@@ -33,7 +33,8 @@
  * @param {string} inputId The id of the hidden input carrying the map value.
  * @param {string} profile The diagram profile to constrain the map to.
  * @param {string} formconfigJson The profile form config (JSON) from mod_vimipad.
- * @param {boolean} readonly Whether the value is shown view-only (browse mode).
+ * @param {boolean} readonly Whether the value is shown view-only (browse mode);
+ *     read-only instances are mounted lazily when they scroll into view.
  */
 export const init = (containerId, inputId, profile, formconfigJson, readonly) => {
     const container = document.getElementById(containerId);
@@ -49,19 +50,39 @@ export const init = (containerId, inputId, profile, formconfigJson, readonly) =>
         formconfig = undefined;
     }
 
-    require(['mod_vimipad/editor_lazy'], (editor) => {
-        editor.mountValue(container, {
-            value: input.value || '',
-            onChange: (valuejson) => {
-                input.value = valuejson;
-            },
-            profile: profile,
-            readonly: readonly === true,
-            formconfig: formconfig,
-            getString: (key) => {
-                const store = window.M && window.M.str && window.M.str.mod_vimipad;
-                return store && store[key] !== undefined ? store[key] : undefined;
-            },
+    const mount = () => {
+        require(['mod_vimipad/editor_lazy'], (editor) => {
+            editor.mountValue(container, {
+                value: input.value || '',
+                onChange: (valuejson) => {
+                    input.value = valuejson;
+                },
+                profile: profile,
+                readonly: readonly === true,
+                formconfig: formconfig,
+                getString: (key) => {
+                    const store = window.M && window.M.str && window.M.str.mod_vimipad;
+                    return store && store[key] !== undefined ? store[key] : undefined;
+                },
+            });
         });
-    });
+    };
+
+    // A read-only browse view can list many entries on one page. Mounting a full
+    // editor for each up front is wasteful, so defer the mount until the entry
+    // scrolls near the viewport. The editable add/edit form is a single instance
+    // and mounts immediately.
+    if (readonly === true && typeof IntersectionObserver !== 'undefined') {
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    obs.disconnect();
+                    mount();
+                }
+            });
+        }, {rootMargin: '200px'});
+        observer.observe(container);
+    } else {
+        mount();
+    }
 };
