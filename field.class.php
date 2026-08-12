@@ -30,10 +30,10 @@
  * reuses the mod_vimipad public profile API so the profile list always matches
  * the activity.
  *
- * This is an early stub: the value is entered and displayed through a plain-text
- * area carrying the serialised map so entries can already be created, stored,
- * searched, exported and backed up. The interactive editor embed (a ViMi Pad
- * transport bound to the field value) replaces that area in a follow-up step.
+ * The value is entered through the embedded ViMi Pad editor (a transport bound to
+ * the field value) and rendered read-only when browsing, so entries can be
+ * created, stored, searched, exported and backed up like any other field. Values
+ * are validated against the public map policy before they are stored.
  */
 class data_field_vimipad extends data_field_base {
     /** @var string The field type key. */
@@ -156,7 +156,7 @@ class data_field_vimipad extends data_field_base {
         $content = new stdClass();
         $content->fieldid = $this->field->id;
         $content->recordid = $recordid;
-        $content->content = self::normalise_value($value);
+        $content->content = $this->validated_value($value);
 
         if (
             $oldid = $DB->get_field(
@@ -283,6 +283,32 @@ class data_field_vimipad extends data_field_base {
      *
      * @param mixed $value The submitted value.
      * @return string
+     */
+    /**
+     * Validate a submitted map against the public ViMi Pad map policy before it
+     * is stored. The record form is a plain POST and can be forged, so without
+     * this an oversized or structurally broken document (or one from a different
+     * diagram profile) would be written straight into {data_content}. An empty
+     * value is allowed: it simply means the field was left blank.
+     *
+     * @param mixed $value The submitted field value.
+     * @return string The value to store.
+     * @throws moodle_exception When a non-empty value violates the map policy.
+     */
+    protected function validated_value($value): string {
+        $normalised = self::normalise_value($value);
+        if ($normalised === '') {
+            return '';
+        }
+        \mod_vimipad\api\value::assert_valid($normalised, self::clamp_profile($this->field->param1));
+        return $normalised;
+    }
+
+    /**
+     * Reduce a submitted field value to the plain string that is stored.
+     *
+     * @param mixed $value The submitted value (may arrive as a single-element array).
+     * @return string The trimmed value.
      */
     protected static function normalise_value($value): string {
         if (is_array($value)) {

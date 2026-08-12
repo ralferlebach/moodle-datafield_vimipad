@@ -40,7 +40,29 @@ First stub of the ViMi Pad database field.
 
 - The value area is a plain-text field carrying the serialised map. The
   interactive editor embed (a ViMi Pad transport bound to the field value) is
-  the next step.## 0.1.7 - 2026-08-10
+  the next step.
+
+## 0.2.0 - 2026-08-12
+
+First beta. Maturity raised from ALPHA to BETA.
+
+### Tests
+- Boundary coverage for stored values: valid map, empty value allowed, oversized
+  refused, malformed refused, profile mismatch refused, and nothing written when
+  a value is refused.
+- A behat scenario covering the entry form showing the embedded editor.
+
+## 0.1.8 - 2026-08-12
+
+### Fixed
+- Field values are validated against the public ViMi Pad map policy, with the
+  configured field profile as the expected profile. A forged record POST could
+  previously write an arbitrarily large or structurally invalid document, or one
+  from a different diagram profile, straight into data_content.
+- Corrected the docblock that still described a plain-text input with the editor
+  arriving later.
+
+## 0.1.7 - 2026-08-10
 
 ### Changed
 - Browse view mounts the read-only editor lazily (IntersectionObserver): each

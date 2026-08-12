@@ -118,7 +118,11 @@ final class field_test extends \advanced_testcase {
         $field = data_get_field($fieldrecord, $data);
         $this->assertInstanceOf(\data_field_vimipad::class, $field);
 
-        $map = '{"nodes":[{"id":"n1"}],"relations":[]}';
+        $map = json_encode([
+            'profile' => 'conceptmap',
+            'nodes' => [['stableid' => 'n1', 'label' => 'Cat']],
+            'relations' => [],
+        ]);
         $this->assertTrue((bool)$field->update_content($recordid, $map));
 
         $stored = $DB->get_field(
@@ -129,7 +133,14 @@ final class field_test extends \advanced_testcase {
         $this->assertSame($map, $stored);
 
         // Update in place (no duplicate row).
-        $map2 = '{"nodes":[{"id":"n1"},{"id":"n2"}],"relations":[{"id":"r1"}]}';
+        $map2 = json_encode([
+            'profile' => 'conceptmap',
+            'nodes' => [
+                ['stableid' => 'n1', 'label' => 'Cat'],
+                ['stableid' => 'n2', 'label' => 'Animal'],
+            ],
+            'relations' => [['stableid' => 'r1', 'sourceid' => 'n1', 'targetid' => 'n2', 'label' => 'is a']],
+        ]);
         $field->update_content($recordid, $map2);
         $rows = $DB->count_records(
             'data_content',
