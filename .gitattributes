@@ -17,3 +17,8 @@
 # maintainers, plugin review and distribution QA.
 /tools              export-ignore
 /makefile           export-ignore
+
+# --- Never distribute: load-test harness ----------------------------------
+# tests/load seeds courses and users, enables web services and REST and mints a
+# token. A fine developer tool; it has no place on a production Moodle server.
+/tests/load         export-ignore
