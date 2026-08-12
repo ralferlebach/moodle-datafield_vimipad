@@ -171,8 +171,9 @@ phpunit:
 load-seed: clear
 	@echo ""
 	@echo "=== Seed load fixture (database with ViMi Pad entries) ==="
-	@$(PHP) $(PLUGIN_DIR)/tests/load/seed_large.php $(SEEDARGS) | tee $(LOAD_DIR)/.load-seed.out
-	@sed -n "s/^export \\([A-Z_][A-Z_]*\\)=.\\(.*\\)./\\1=\\2/p" $(LOAD_DIR)/.load-seed.out > $(LOAD_DIR)/.load-env
+	@$(PHP) $(PLUGIN_DIR)/tests/load/seed_large.php $(SEEDARGS) > $(LOAD_DIR)/.load-seed.out || { cat $(LOAD_DIR)/.load-seed.out; echo "Seeding failed - see the error above."; rm -f $(LOAD_DIR)/.load-seed.out; exit 1; }
+	@cat $(LOAD_DIR)/.load-seed.out
+	@sed -n "s/^export \([A-Z_][A-Z_]*\)=.\(.*\)./\1=\2/p" $(LOAD_DIR)/.load-seed.out > $(LOAD_DIR)/.load-env
 	@rm -f $(LOAD_DIR)/.load-seed.out
 	@echo ""
 	@echo "Saved BASE_URL/CMID/USERNAMES/PASSWORD to $(LOAD_DIR)/.load-env"
@@ -181,31 +182,31 @@ load-seed: clear
 jmeter-setup:
 	@echo ""
 	@echo "=== JMeter setup ==="
-	@if [ -x $(JMETER) ]; then \\
-		echo "JMeter $(JMETER_VERSION) already present at $(JMETER_HOME)."; \\
-	else \\
-		echo "Downloading Apache JMeter $(JMETER_VERSION)..."; \\
-		cd $(LOAD_DIR) && \\
-		curl -fsSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$(JMETER_VERSION).tgz -o jmeter.tgz && \\
-		tar xzf jmeter.tgz && rm -f jmeter.tgz && \\
-		echo "Installed to $(JMETER_HOME)."; \\
+	@if [ -x $(JMETER) ]; then \
+		echo "JMeter $(JMETER_VERSION) already present at $(JMETER_HOME)."; \
+	else \
+		echo "Downloading Apache JMeter $(JMETER_VERSION)..."; \
+		cd $(LOAD_DIR) && \
+		curl -fsSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$(JMETER_VERSION).tgz -o jmeter.tgz && \
+		tar xzf jmeter.tgz && rm -f jmeter.tgz && \
+		echo "Installed to $(JMETER_HOME)."; \
 	fi
 
 jmeter: clear jmeter-setup
 	@echo ""
 	@echo "=== JMeter load test — datafield_vimipad pages ==="
 	@command -v java >/dev/null 2>&1 || { echo "Java (JRE 8+) is required to run JMeter — please install a JRE."; exit 1; }
-	@if [ -z "$(CMID)" ] || [ -z "$(USERNAME)" ] || [ -z "$(PASSWORD)" ]; then \\
-		echo "Missing required parameters. Usage:"; \\
-		echo "  make jmeter BASE_URL=<wwwroot> CMID=<id> USERNAMES=<user,...> PASSWORD=<pw>"; \\
-		echo ""; \\
-		echo "  Run 'make load-seed' first — it creates the fixture and the accounts."; \\
-		exit 1; \\
+	@if [ -z "$(CMID)" ] || [ -z "$(USERNAME)" ] || [ -z "$(PASSWORD)" ]; then \
+		echo "Missing required parameters. Usage:"; \
+		echo "  make jmeter BASE_URL=<wwwroot> CMID=<id> USERNAMES=<user,...> PASSWORD=<pw>"; \
+		echo ""; \
+		echo "  Run 'make load-seed' first — it creates the fixture and the accounts."; \
+		exit 1; \
 	fi
-	cd $(LOAD_DIR) && $(JMETER) -n -t datafield_vimipad-read-endpoints.jmx \\
-		-Jbase_url='$(BASE_URL)' -Jcmid='$(CMID)' \\
-		-Jusername='$(USERNAME)' -Jpassword='$(PASSWORD)' -Jperpage='$(PERPAGE)' \\
-		-Jthreads='$(THREADS)' -Jrampup='$(RAMPUP)' -Jloops='$(LOOPS)' \\
+	cd $(LOAD_DIR) && $(JMETER) -n -t datafield_vimipad-read-endpoints.jmx \
+		-Jbase_url='$(BASE_URL)' -Jcmid='$(CMID)' \
+		-Jusername='$(USERNAME)' -Jpassword='$(PASSWORD)' -Jperpage='$(PERPAGE)' \
+		-Jthreads='$(THREADS)' -Jrampup='$(RAMPUP)' -Jloops='$(LOOPS)' \
 		-l datafield_vimipad-load-results.jtl
 	@echo ""
 	@echo "Results written to $(LOAD_DIR)/datafield_vimipad-load-results.jtl"
@@ -213,30 +214,30 @@ jmeter: clear jmeter-setup
 k6-setup:
 	@echo ""
 	@echo "=== k6 setup ==="
-	@if command -v $(K6) >/dev/null 2>&1; then \\
-		echo "k6 already on PATH."; \\
-	elif [ -x $(LOAD_DIR)/k6 ]; then \\
-		echo "k6 already present at $(LOAD_DIR)/k6."; \\
-	else \\
-		arch=$$(uname -m); case "$$arch" in x86_64) a=amd64;; aarch64|arm64) a=arm64;; *) a=amd64;; esac; \\
-		echo "Downloading k6 $(K6_VERSION) (linux-$$a)..."; \\
-		cd $(LOAD_DIR) && \\
-		curl -fsSL "https://github.com/grafana/k6/releases/download/v$(K6_VERSION)/k6-v$(K6_VERSION)-linux-$$a.tar.gz" -o k6.tgz && \\
-		tar xzf k6.tgz && cp "k6-v$(K6_VERSION)-linux-$$a/k6" ./k6 && chmod +x ./k6 && \\
-		rm -rf k6.tgz "k6-v$(K6_VERSION)-linux-$$a" && \\
-		echo "Installed to $(LOAD_DIR)/k6"; \\
+	@if command -v $(K6) >/dev/null 2>&1; then \
+		echo "k6 already on PATH."; \
+	elif [ -x $(LOAD_DIR)/k6 ]; then \
+		echo "k6 already present at $(LOAD_DIR)/k6."; \
+	else \
+		arch=$$(uname -m); case "$$arch" in x86_64) a=amd64;; aarch64|arm64) a=arm64;; *) a=amd64;; esac; \
+		echo "Downloading k6 $(K6_VERSION) (linux-$$a)..."; \
+		cd $(LOAD_DIR) && \
+		curl -fsSL "https://github.com/grafana/k6/releases/download/v$(K6_VERSION)/k6-v$(K6_VERSION)-linux-$$a.tar.gz" -o k6.tgz && \
+		tar xzf k6.tgz && cp "k6-v$(K6_VERSION)-linux-$$a/k6" ./k6 && chmod +x ./k6 && \
+		rm -rf k6.tgz "k6-v$(K6_VERSION)-linux-$$a" && \
+		echo "Installed to $(LOAD_DIR)/k6"; \
 	fi
 
 load-k6: clear k6-setup
 	@echo ""
 	@echo "=== k6 load test — datafield_vimipad pages ==="
-	@if [ -z "$(CMID)" ] || [ -z "$(USERNAMES)" ] || [ -z "$(PASSWORD)" ]; then \\
-		echo "Missing required parameters. Usage:"; \\
-		echo "  make load-k6 BASE_URL=<wwwroot> CMID=<id> USERNAMES=<user,...> PASSWORD=<pw>"; \\
-		exit 1; \\
+	@if [ -z "$(CMID)" ] || [ -z "$(USERNAMES)" ] || [ -z "$(PASSWORD)" ]; then \
+		echo "Missing required parameters. Usage:"; \
+		echo "  make load-k6 BASE_URL=<wwwroot> CMID=<id> USERNAMES=<user,...> PASSWORD=<pw>"; \
+		exit 1; \
 	fi
-	@K6BIN=$$(command -v $(K6) 2>/dev/null || echo "$(LOAD_DIR)/k6"); \\
-	cd $(LOAD_DIR) && "$$K6BIN" run datafield_vimipad-read-endpoints.k6.js \\
-		-e BASE_URL='$(BASE_URL)' -e CMID='$(CMID)' \\
-		-e USERNAMES='$(USERNAMES)' -e PASSWORD='$(PASSWORD)' \\
+	@K6BIN=$$(command -v $(K6) 2>/dev/null || echo "$(LOAD_DIR)/k6"); \
+	cd $(LOAD_DIR) && "$$K6BIN" run datafield_vimipad-read-endpoints.k6.js \
+		-e BASE_URL='$(BASE_URL)' -e CMID='$(CMID)' \
+		-e USERNAMES='$(USERNAMES)' -e PASSWORD='$(PASSWORD)' \
 		-e PERPAGE='$(PERPAGE)'
