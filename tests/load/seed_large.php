@@ -87,10 +87,17 @@ $created = add_moduleinfo((object) [
     'module' => $module->id,
     'course' => $course->id,
     'section' => 0,
-    'visible' => 1,
     'name' => 'Load database',
     'intro' => '',
     'introformat' => FORMAT_HTML,
+    // Add_moduleinfo passes these straight to the module's callbacks, which read
+    // them without checking: mod_data's grade-item update dereferences
+    // cmidnumber, so omitting it raises a PHP warning during seeding.
+    'cmidnumber' => '',
+    'groupmode' => NOGROUPS,
+    'groupingid' => 0,
+    'completion' => COMPLETION_TRACKING_NONE,
+    'visible' => 1,
 ], $course);
 $cmid = (int) $created->coursemodule;
 $dataid = (int) $created->instance;

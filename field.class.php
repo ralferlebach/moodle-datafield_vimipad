@@ -158,13 +158,12 @@ class data_field_vimipad extends data_field_base {
         $content->recordid = $recordid;
         $content->content = $this->validated_value($value);
 
-        if (
-            $oldid = $DB->get_field(
-                'data_content',
-                'id',
-                ['fieldid' => $this->field->id, 'recordid' => $recordid]
-            )
-        ) {
+        $oldid = $DB->get_field(
+            'data_content',
+            'id',
+            ['fieldid' => $this->field->id, 'recordid' => $recordid]
+        );
+        if ($oldid) {
             $content->id = $oldid;
             return $DB->update_record('data_content', $content);
         }

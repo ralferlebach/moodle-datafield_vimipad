@@ -113,9 +113,10 @@ lint-cpd:
 lint-md:
 	@echo ""
 	@echo "=== PHP Mess Detector ==="
-	-cd $(PLUGIN_DIR) && phpmd . text \
-		cleancode,codesize,controversial,design,naming,unusedcode \
-		--exclude tests,tools || true
+	@echo "Rules: phpmd.xml (Moodle-incompatible rules excluded, each with a reason)."
+	@echo "db/upgrade.php is exempt: its shape is prescribed by Moodle."
+	-cd $(PLUGIN_DIR) && phpmd . text phpmd.xml \
+		--exclude tests,tools,tests/load,db/upgrade.php || true
 
 lint-js:
 	@echo ""

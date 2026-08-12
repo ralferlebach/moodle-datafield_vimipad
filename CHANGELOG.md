@@ -42,6 +42,16 @@ First stub of the ViMi Pad database field.
   interactive editor embed (a ViMi Pad transport bound to the field value) is
   the next step.
 
+## 0.2.3 - 2026-08-12
+
+### Changed
+- Added phpmd.xml, a curated PHPMD ruleset; the plugin reports zero findings
+  against it.
+
+### Fixed
+- update_content() assigned inside an if condition, which hides the assignment
+  from readers; the lookup is now a separate statement.
+
 ## 0.2.2 - 2026-08-12
 
 ### Fixed
