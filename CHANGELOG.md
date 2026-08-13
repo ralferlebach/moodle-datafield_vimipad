@@ -4,43 +4,33 @@ All notable changes to datafield_vimipad are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project adheres to
 semantic-ish plain patch numbering.
 
-## 0.1.1 - 2026-08-10
-
-### Fixed
-- Added the missing `fieldtypelabel` language string; the field edit page no
-  longer shows the raw `[[fieldtypelabel]]` placeholder.
-- The field now ships and renders its own type icon (via an `image()` override),
-  so the ViMi Pad glyph appears next to the field name in the field list and on
-  the field edit page.
+## 0.2.6 - 2026-08-12
 
 ### Changed
-- Field-type icon redrawn as a neutral monochrome glyph.
+- The diagram profile can no longer be changed once entries hold maps. Every
+  stored map carries its own profile, and values are validated against the
+  field's profile on save: after a silent change a learner reopening an untouched
+  entry could no longer save it, refused because of a profile they never chose.
+  Migrating the stored maps instead would mean rewriting other people's work
+  server-side. On an empty field the profile stays freely changeable, and other
+  settings such as the name remain editable either way.
 
-## 0.1.0 — 2026-08-10
+## 0.2.5 - 2026-08-12
 
-First stub of the ViMi Pad database field.
+### Fixed
+- Added the missing CamelCaseNamespace exclusion to phpmd.xml. The plugin now
+  reports zero findings.
 
-### Added
+### Changed
+- The AMD target can refresh the browserslist database with
+  BROWSERSLIST_UPDATE=1 (off by default).
 
-- Field-type skeleton `data_field_vimipad` (extends `data_field_base`): value
-  entry, storage into core `{data_content}`, browse display, text export and
-  simple search.
-- Field-definition form (`mod.html`) offering the full ViMi Pad diagram-profile
-  list, sourced from the `mod_vimipad` public profile API
-  (`\mod_vimipad\profile\profiles`).
-- Privacy provider implementing `null_provider` and mod_data's
-  `datafield_provider` (the map lives in core-owned tables).
-- English and German language packs at key parity.
-- PHPUnit tests for the cross-plugin profile-API contract, profile clamping, the
-  map summary, and an `update_content` round-trip against a real Database
-  activity.
-- Declared dependency on `mod_vimipad` (>= 0.9.0 / 2026080800).
+## 0.2.4 - 2026-08-12
 
-### Known limitations
-
-- The value area is a plain-text field carrying the serialised map. The
-  interactive editor embed (a ViMi Pad transport bound to the field value) is
-  the next step.
+### Fixed
+- Removed a leftover docblock above validated_value() and the unused stubhint
+  string from the preview version.
+- Changelog entries are now in descending version order.
 
 ## 0.2.3 - 2026-08-12
 
@@ -130,4 +120,40 @@ First beta. Maturity raised from ALPHA to BETA.
   auto-captured as the field value (no separate snapshot step).
 - Dependency raised to mod_vimipad 2026080804 (0.9.4).
 
+## 0.1.1 - 2026-08-10
 
+### Fixed
+- Added the missing `fieldtypelabel` language string; the field edit page no
+  longer shows the raw `[[fieldtypelabel]]` placeholder.
+- The field now ships and renders its own type icon (via an `image()` override),
+  so the ViMi Pad glyph appears next to the field name in the field list and on
+  the field edit page.
+
+### Changed
+- Field-type icon redrawn as a neutral monochrome glyph.
+
+## 0.1.0 — 2026-08-10
+
+First stub of the ViMi Pad database field.
+
+### Added
+
+- Field-type skeleton `data_field_vimipad` (extends `data_field_base`): value
+  entry, storage into core `{data_content}`, browse display, text export and
+  simple search.
+- Field-definition form (`mod.html`) offering the full ViMi Pad diagram-profile
+  list, sourced from the `mod_vimipad` public profile API
+  (`\mod_vimipad\profile\profiles`).
+- Privacy provider implementing `null_provider` and mod_data's
+  `datafield_provider` (the map lives in core-owned tables).
+- English and German language packs at key parity.
+- PHPUnit tests for the cross-plugin profile-API contract, profile clamping, the
+  map summary, and an `update_content` round-trip against a real Database
+  activity.
+- Declared dependency on `mod_vimipad` (>= 0.9.0 / 2026080800).
+
+### Known limitations
+
+- The value area is a plain-text field carrying the serialised map. The
+  interactive editor embed (a ViMi Pad transport bound to the field value) is
+  the next step.

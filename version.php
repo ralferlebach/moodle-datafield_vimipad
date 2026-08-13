@@ -25,16 +25,17 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'datafield_vimipad';
-$plugin->version      = 2026081212;
+$plugin->version      = 2026081215;
 $plugin->requires     = 2024100700;   // Moodle 4.5.0 — hard minimum, mirrors mod_vimipad.
 $plugin->supported    = [405, 502];   // Tested on Moodle 4.5–5.2, like the activity it depends on.
 $plugin->maturity     = MATURITY_BETA;
-$plugin->release      = '0.2.3';
+$plugin->release      = '0.2.6';
 
 // A ViMi Pad database field embeds the shared editor as the value of a database
 // activity entry. It reuses the public API (\mod_vimipad\profile\*) and the
 // embeddable editor; the map JSON is stored in core's {data_content} table via
-// a field-value adapter. The dependency is declared and pinned to the 0.9.0 API.
+// a field-value adapter. The dependency is declared at the build that
+// introduced the public map-value API this field validates its values with.
 $plugin->dependencies = [
-    'mod_vimipad' => 2026081203,
+    'mod_vimipad' => 2026081208,
 ];

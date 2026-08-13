@@ -31,4 +31,4 @@ $string['pluginname'] = 'ViMi Pad';
 $string['privacy:metadata'] = 'The ViMi Pad database field stores no personal data of its own. The map is stored by the database activity in core-owned tables.';
 $string['profile'] = 'Diagram profile';
 $string['profile_help'] = 'The ViMi Pad diagram profile entries in this field are constrained to, for example concept map, mind map or tree. The list is provided by the ViMi Pad activity.';
-$string['stubhint'] = 'Early preview ({$a} profile): paste or type the serialised map here. The interactive ViMi Pad editor will replace this field.';
+$string['profilelocked'] = 'The diagram profile cannot be changed: {$a} entries already contain a map, and they would no longer match the field. Empty those entries first, or add a new field with the profile you want.';

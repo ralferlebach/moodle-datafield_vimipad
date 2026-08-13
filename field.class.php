@@ -68,6 +68,45 @@ class data_field_vimipad extends data_field_base {
     }
 
     /**
+     * Refuse a profile change while entries already hold maps.
+     *
+     * The diagram profile is a structural property of the field, and every
+     * stored map carries its own profile. Changing it under existing entries
+     * would leave each of them mismatched: since values are validated against
+     * the field's profile on save, a learner reopening an untouched entry could
+     * no longer save it - refused because of a profile they never chose and
+     * cannot change. Migrating the stored maps instead would mean rewriting other
+     * people's work server-side, which is not something to do silently to
+     * assessed material. So the change is refused while there is anything to
+     * break; on an empty field it stays free.
+     *
+     * @param stdClass $fieldinput The submitted field settings.
+     * @return array Errors keyed by parameter name; empty when the change is fine.
+     */
+    public function validate(stdClass $fieldinput): array {
+        global $DB;
+
+        $errors = parent::validate($fieldinput);
+
+        $newprofile = self::clamp_profile($fieldinput->param1 ?? '');
+        $oldprofile = self::clamp_profile($this->field->param1 ?? '');
+        if (empty($this->field->id) || $newprofile === $oldprofile) {
+            return $errors;
+        }
+
+        $inuse = $DB->count_records_select(
+            'data_content',
+            "fieldid = :fieldid AND content IS NOT NULL AND " . $DB->sql_compare_text('content') . " <> :empty",
+            ['fieldid' => $this->field->id, 'empty' => '']
+        );
+        if ($inuse > 0) {
+            $errors['param1'] = get_string('profilelocked', 'datafield_vimipad', $inuse);
+        }
+
+        return $errors;
+    }
+
+    /**
      * Render the value-entry control shown to the user adding/editing an entry.
      *
      * @param int $recordid The record being edited (0 for a new record).
@@ -277,12 +316,6 @@ class data_field_vimipad extends data_field_base {
         return $options;
     }
 
-    /**
-     * Normalise a submitted value to a trimmed string for storage.
-     *
-     * @param mixed $value The submitted value.
-     * @return string
-     */
     /**
      * Validate a submitted map against the public ViMi Pad map policy before it
      * is stored. The record form is a plain POST and can be forged, so without

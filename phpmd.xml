@@ -35,6 +35,11 @@
 
   <!-- Size and complexity apply in full, with one exception below. -->
   <rule ref="rulesets/codesize.xml">
+    <!-- A mod_data field plugin implements a prescribed set of callbacks
+         (define_default_field, display_add_field, display_browse_field,
+         update_content, validate, export_text_value and more). Their number is
+         set by the API, not by this plugin's design. -->
+    <exclude name="TooManyPublicMethods"/>
     <!-- A policy validator (classes/api/value.php) is by nature a collection of
          independent checks and its total class complexity is their sum. Each
          individual check stays small and is still covered by the per-method
@@ -46,6 +51,11 @@
   <rule ref="rulesets/controversial.xml">
     <!-- Moodle mandates snake_case for classes, methods and namespaces, and
          mandates the $DB/$CFG/$USER/$PAGE/$OUTPUT/$COURSE globals verbatim. -->
+    <!-- Moodle namespaces are the plugin's frankenstyle name plus a snake_case
+         sub-namespace (mod_vimigallery\output, qtype_vimipad\local). Many files
+         are also deliberately in the global namespace, which PHPMD reports as
+         "+global". Neither is changeable. -->
+    <exclude name="CamelCaseNamespace"/>
     <exclude name="CamelCaseClassName"/>
     <exclude name="CamelCaseMethodName"/>
     <exclude name="CamelCaseVariableName"/>
