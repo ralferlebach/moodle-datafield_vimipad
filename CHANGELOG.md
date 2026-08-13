@@ -4,6 +4,13 @@ All notable changes to datafield_vimipad are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project adheres to
 semantic-ish plain patch numbering.
 
+## 0.2.7 - 2026-08-13
+
+### Fixed
+- The entry scenario used a link and a page type that mod_data does not provide:
+  "Add entry" is not a link, and "fields" is not a recognised page type. It now
+  uses mod_data's own "Add entry" page, which is the route to the editor anyway.
+
 ## 0.2.6 - 2026-08-12
 
 ### Changed
