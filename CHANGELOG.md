@@ -4,6 +4,16 @@ All notable changes to datafield_vimipad are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project adheres to
 semantic-ish plain patch numbering.
 
+## 1.0.0-RC1 - 2026-09-11
+
+First release candidate. Maturity raised to MATURITY_RC.
+
+### Added
+- Moodle 5.1 in development and release CI.
+- The release workflow can pin the mod_vimipad dependency to an immutable tag or
+  SHA and records the qualified SHA in the job summary; development runs still
+  float on development.
+
 ## 0.2.7 - 2026-08-13
 
 ### Fixed
