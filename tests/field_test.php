@@ -118,7 +118,11 @@ final class field_test extends \advanced_testcase {
         $field = data_get_field($fieldrecord, $data);
         $this->assertInstanceOf(\data_field_vimipad::class, $field);
 
-        $map = '{"nodes":[{"id":"n1"}],"relations":[]}';
+        $map = json_encode([
+            'profile' => 'conceptmap',
+            'nodes' => [['stableid' => 'n1', 'label' => 'Cat']],
+            'relations' => [],
+        ]);
         $this->assertTrue((bool)$field->update_content($recordid, $map));
 
         $stored = $DB->get_field(
@@ -129,7 +133,14 @@ final class field_test extends \advanced_testcase {
         $this->assertSame($map, $stored);
 
         // Update in place (no duplicate row).
-        $map2 = '{"nodes":[{"id":"n1"},{"id":"n2"}],"relations":[{"id":"r1"}]}';
+        $map2 = json_encode([
+            'profile' => 'conceptmap',
+            'nodes' => [
+                ['stableid' => 'n1', 'label' => 'Cat'],
+                ['stableid' => 'n2', 'label' => 'Animal'],
+            ],
+            'relations' => [['stableid' => 'r1', 'sourceid' => 'n1', 'targetid' => 'n2', 'label' => 'is a']],
+        ]);
         $field->update_content($recordid, $map2);
         $rows = $DB->count_records(
             'data_content',
@@ -141,5 +152,53 @@ final class field_test extends \advanced_testcase {
             'content',
             ['fieldid' => $fieldrecord->id, 'recordid' => $recordid]
         ));
+    }
+
+    /**
+     * display_browse_field renders the read-only embedded editor for a stored
+     * map, and nothing for an empty record.
+     *
+     * @covers \data_field_vimipad::display_browse_field
+     * @return void
+     */
+    public function test_display_browse_field_renders_readonly_editor(): void {
+        global $DB, $PAGE;
+        $this->resetAfterTest();
+        $PAGE->set_url('/mod/data/view.php');
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $data = $generator->create_module('data', ['course' => $course->id]);
+
+        $fieldrecord = (object)[
+            'dataid' => $data->id,
+            'type' => 'vimipad',
+            'name' => 'Map',
+            'description' => '',
+            'param1' => 'conceptmap',
+        ];
+        $fieldrecord->id = $DB->insert_record('data_fields', $fieldrecord);
+        $recordid = $DB->insert_record('data_records', (object)[
+            'dataid' => $data->id,
+            'userid' => 2,
+            'groupid' => 0,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+        $field = data_get_field($fieldrecord, $data);
+
+        // An empty record renders nothing.
+        $this->assertSame('', $field->display_browse_field($recordid, ''));
+
+        // A stored map renders the read-only editor container and the value.
+        $map = '{"profile":"conceptmap","nodes":[{"stableid":"a","label":"Water"}],"relations":[]}';
+        $field->update_content($recordid, $map);
+        $html = $field->display_browse_field($recordid, '');
+
+        $containerid = 'field_' . $fieldrecord->id . '_r' . $recordid . '_editor';
+        $this->assertStringContainsString($containerid, $html);
+        $this->assertStringContainsString('datafield_vimipad_browse', $html);
+        $this->assertStringContainsString('Water', $html);
+        $this->assertStringContainsString('<noscript>', $html);
     }
 }

@@ -24,9 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['fieldtypelabel'] = 'ViMi Pad';
 $string['mapsummary'] = 'Map mit {$a->nodes} Knoten und {$a->relations} Relation(en)';
+$string['noscript'] = 'Dieses Feld benötigt aktiviertes JavaScript, um die Map zu erstellen.';
 $string['pluginname'] = 'ViMi Pad';
 $string['privacy:metadata'] = 'Das ViMi-Pad-Datenbankfeld speichert selbst keine personenbezogenen Daten. Die Map wird von der Datenbank-Aktivität in kerneigenen Tabellen gespeichert.';
 $string['profile'] = 'Diagrammprofil';
 $string['profile_help'] = 'Das ViMi-Pad-Diagrammprofil, auf das Einträge in diesem Feld eingeschränkt werden, zum Beispiel Concept Map, Mindmap oder Baum. Die Liste stammt aus der ViMi-Pad-Aktivität.';
-$string['stubhint'] = 'Frühe Vorschau (Profil {$a}): Serialisierte Map hier einfügen oder eingeben. Der interaktive ViMi-Pad-Editor ersetzt dieses Feld.';
+$string['profilelocked'] = 'Das Diagrammprofil kann nicht geändert werden: {$a} Einträge enthalten bereits eine Map und würden nicht mehr zum Feld passen. Leeren Sie diese Einträge zuerst, oder legen Sie ein neues Feld mit dem gewünschten Profil an.';

@@ -1,0 +1,35 @@
+@mod @mod_data @datafield @datafield_vimipad
+Feature: Create database entries with a ViMi Pad field
+  In order to collect visual maps in a database
+  As a learner
+  I need the ViMi Pad editor on the entry form
+
+  Background:
+    Given the following "courses" exist:
+      | fullname | shortname | category |
+      | Course 1 | C1        | 0        |
+    And the following "users" exist:
+      | username | firstname | lastname | email                |
+      | teacher1 | Tay       | Teacher  | teacher1@example.com |
+      | student1 | Sam       | Student  | student1@example.com |
+    And the following "course enrolments" exist:
+      | user     | course | role           |
+      | teacher1 | C1     | editingteacher |
+      | student1 | C1     | student        |
+    And the following "activities" exist:
+      | activity | name     | course | idnumber |
+      | data     | Map bank | C1     | data1    |
+    And the following "mod_data > fields" exist:
+      | database | type    | name | description    |
+      | data1    | vimipad | Map  | A ViMi Pad map |
+
+  @javascript
+  Scenario: The ViMi Pad editor is offered on the entry form
+    When I am on the "Map bank" "mod_data > Add entry" page logged in as student1
+    Then ".datafield_vimipad_editor" "css_element" should exist
+    And I should see "Map"
+
+  @javascript
+  Scenario: A teacher reaches the same editor when adding an entry
+    When I am on the "Map bank" "mod_data > Add entry" page logged in as teacher1
+    Then ".datafield_vimipad_editor" "css_element" should exist

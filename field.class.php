@@ -30,10 +30,10 @@
  * reuses the mod_vimipad public profile API so the profile list always matches
  * the activity.
  *
- * This is an early stub: the value is entered and displayed through a plain-text
- * area carrying the serialised map so entries can already be created, stored,
- * searched, exported and backed up. The interactive editor embed (a ViMi Pad
- * transport bound to the field value) replaces that area in a follow-up step.
+ * The value is entered through the embedded ViMi Pad editor (a transport bound to
+ * the field value) and rendered read-only when browsing, so entries can be
+ * created, stored, searched, exported and backed up like any other field. Values
+ * are validated against the public map policy before they are stored.
  */
 class data_field_vimipad extends data_field_base {
     /** @var string The field type key. */
@@ -50,6 +50,60 @@ class data_field_vimipad extends data_field_base {
             $this->field->param1 = 'conceptmap';
         }
         return true;
+    }
+
+    /**
+     * The field-type icon, served from this plugin instead of mod_data core.
+     *
+     * The base implementation resolves the icon inside mod_data
+     * ({@see \data_field_base::image()}); overriding it lets the subplugin
+     * ship its own glyph, which is what renders next to the field name on the
+     * field management and edit pages.
+     *
+     * @return string The rendered icon HTML.
+     */
+    public function image() {
+        global $OUTPUT;
+        return $OUTPUT->pix_icon('icon', $this->type, 'datafield_vimipad');
+    }
+
+    /**
+     * Refuse a profile change while entries already hold maps.
+     *
+     * The diagram profile is a structural property of the field, and every
+     * stored map carries its own profile. Changing it under existing entries
+     * would leave each of them mismatched: since values are validated against
+     * the field's profile on save, a learner reopening an untouched entry could
+     * no longer save it - refused because of a profile they never chose and
+     * cannot change. Migrating the stored maps instead would mean rewriting other
+     * people's work server-side, which is not something to do silently to
+     * assessed material. So the change is refused while there is anything to
+     * break; on an empty field it stays free.
+     *
+     * @param stdClass $fieldinput The submitted field settings.
+     * @return array Errors keyed by parameter name; empty when the change is fine.
+     */
+    public function validate(stdClass $fieldinput): array {
+        global $DB;
+
+        $errors = parent::validate($fieldinput);
+
+        $newprofile = self::clamp_profile($fieldinput->param1 ?? '');
+        $oldprofile = self::clamp_profile($this->field->param1 ?? '');
+        if (empty($this->field->id) || $newprofile === $oldprofile) {
+            return $errors;
+        }
+
+        $inuse = $DB->count_records_select(
+            'data_content',
+            "fieldid = :fieldid AND content IS NOT NULL AND " . $DB->sql_compare_text('content') . " <> :empty",
+            ['fieldid' => $this->field->id, 'empty' => '']
+        );
+        if ($inuse > 0) {
+            $errors['param1'] = get_string('profilelocked', 'datafield_vimipad', $inuse);
+        }
+
+        return $errors;
     }
 
     /**
@@ -75,28 +129,56 @@ class data_field_vimipad extends data_field_base {
         }
 
         $fieldid = 'field_' . $this->field->id;
+        $inputid = $fieldid . '_value';
+        $containerid = $fieldid . '_editor';
         $profile = self::clamp_profile($this->field->param1);
 
-        $label = html_writer::tag(
-            'label',
-            s($this->field->name),
-            ['for' => $fieldid, 'class' => 'accesshide']
-        );
-        $textarea = html_writer::tag('textarea', s($content), [
-            'id' => $fieldid,
+        // Hidden value field carrying the serialised map; the editor mirrors edits into it.
+        $hidden = html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'id' => $inputid,
             'name' => $fieldid,
-            'rows' => 6,
-            'class' => 'form-control datafield_vimipad_value',
-            'data-profile' => $profile,
-            'spellcheck' => 'false',
+            'value' => $content,
         ]);
-        $hint = html_writer::tag(
-            'div',
-            get_string('stubhint', 'datafield_vimipad', $profile),
-            ['class' => 'datafield_vimipad_stubhint text-muted']
+        $container = html_writer::tag('div', '', [
+            'id' => $containerid,
+            'class' => 'datafield_vimipad_editor',
+            'style' => 'min-height:480px;',
+            'data-profile' => $profile,
+        ]);
+        $noscript = html_writer::tag(
+            'noscript',
+            html_writer::tag('div', get_string('noscript', 'datafield_vimipad'), ['class' => 'text-muted'])
         );
 
-        return html_writer::div($label . $textarea . $hint, 'datafield_vimipad');
+        $this->preload_editor_strings();
+        global $PAGE;
+        $formconfig = json_encode(\mod_vimipad\profile\profiles::form_config($profile));
+        $PAGE->requires->js_call_amd('datafield_vimipad/field', 'init', [
+            $containerid, $inputid, $profile, $formconfig, false,
+        ]);
+
+        return html_writer::div($hidden . $container . $noscript, 'datafield_vimipad');
+    }
+
+    /**
+     * Preload the mod_vimipad editor language strings so the embedded editor
+     * resolves them, without hard-coding the key list in this plugin.
+     *
+     * @return void
+     */
+    protected function preload_editor_strings() {
+        global $PAGE;
+        $strings = get_string_manager()->load_component_strings('mod_vimipad', current_language());
+        $keys = [];
+        foreach (array_keys($strings) as $key) {
+            if (strpos($key, 'editor:') === 0 || strpos($key, 'constraint:') === 0) {
+                $keys[] = $key;
+            }
+        }
+        if ($keys) {
+            $PAGE->requires->strings_for_js($keys, 'mod_vimipad');
+        }
     }
 
     /**
@@ -113,15 +195,14 @@ class data_field_vimipad extends data_field_base {
         $content = new stdClass();
         $content->fieldid = $this->field->id;
         $content->recordid = $recordid;
-        $content->content = self::normalise_value($value);
+        $content->content = $this->validated_value($value);
 
-        if (
-            $oldid = $DB->get_field(
-                'data_content',
-                'id',
-                ['fieldid' => $this->field->id, 'recordid' => $recordid]
-            )
-        ) {
+        $oldid = $DB->get_field(
+            'data_content',
+            'id',
+            ['fieldid' => $this->field->id, 'recordid' => $recordid]
+        );
+        if ($oldid) {
             $content->id = $oldid;
             return $DB->update_record('data_content', $content);
         }
@@ -146,7 +227,38 @@ class data_field_vimipad extends data_field_base {
         if ($content === false || trim((string)$content) === '') {
             return '';
         }
-        return html_writer::div(s(self::map_summary($content)), 'datafield_vimipad_browse');
+
+        global $PAGE;
+        $baseid = 'field_' . $this->field->id . '_r' . (int) $recordid;
+        $inputid = $baseid . '_value';
+        $containerid = $baseid . '_editor';
+        $profile = self::clamp_profile($this->field->param1);
+
+        // Read-only browse: no name (not submitted); the editor renders the map.
+        $hidden = html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'id' => $inputid,
+            'value' => (string) $content,
+        ]);
+        $container = html_writer::tag('div', '', [
+            'id' => $containerid,
+            'class' => 'datafield_vimipad_editor datafield_vimipad_browse',
+            'style' => 'min-height:360px;',
+            'data-profile' => $profile,
+        ]);
+        // No-JS fallback: the plain-text summary.
+        $noscript = html_writer::tag(
+            'noscript',
+            html_writer::div(s(self::map_summary($content)), 'datafield_vimipad_browse')
+        );
+
+        $this->preload_editor_strings();
+        $formconfig = json_encode(\mod_vimipad\profile\profiles::form_config($profile));
+        $PAGE->requires->js_call_amd('datafield_vimipad/field', 'init', [
+            $containerid, $inputid, $profile, $formconfig, true,
+        ]);
+
+        return html_writer::div($hidden . $container . $noscript, 'datafield_vimipad');
     }
 
     /**
@@ -205,10 +317,30 @@ class data_field_vimipad extends data_field_base {
     }
 
     /**
-     * Normalise a submitted value to a trimmed string for storage.
+     * Validate a submitted map against the public ViMi Pad map policy before it
+     * is stored. The record form is a plain POST and can be forged, so without
+     * this an oversized or structurally broken document (or one from a different
+     * diagram profile) would be written straight into {data_content}. An empty
+     * value is allowed: it simply means the field was left blank.
      *
-     * @param mixed $value The submitted value.
-     * @return string
+     * @param mixed $value The submitted field value.
+     * @return string The value to store.
+     * @throws moodle_exception When a non-empty value violates the map policy.
+     */
+    protected function validated_value($value): string {
+        $normalised = self::normalise_value($value);
+        if ($normalised === '') {
+            return '';
+        }
+        \mod_vimipad\api\value::assert_valid($normalised, self::clamp_profile($this->field->param1));
+        return $normalised;
+    }
+
+    /**
+     * Reduce a submitted field value to the plain string that is stored.
+     *
+     * @param mixed $value The submitted value (may arrive as a single-element array).
+     * @return string The trimmed value.
      */
     protected static function normalise_value($value): string {
         if (is_array($value)) {
