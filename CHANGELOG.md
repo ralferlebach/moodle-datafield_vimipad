@@ -8,7 +8,10 @@ semantic-ish plain patch numbering.
 
 First release candidate. Maturity raised to MATURITY_RC.
 
+
 ### Added
+- Playwright user-story suite (Teacher, Student) with a seed, a workflow and a
+  video recorded on every run. See tests/playwright.
 - Moodle 5.1 in development and release CI.
 - The release workflow can pin the mod_vimipad dependency to an immutable tag or
   SHA and records the qualified SHA in the job summary; development runs still

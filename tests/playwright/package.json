@@ -1,0 +1,16 @@
+{
+  "name": "datafield_vimipad-playwright",
+  "private": true,
+  "description": "Browser end-to-end user-story tests for datafield_vimipad (CI/live only).",
+  "scripts": {
+    "test": "playwright test",
+    "install-browsers": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0"
+  },
+  "dependencies": {
+    "@types/node": "^22.20.2",
+    "typescript": "^7.0.2"
+  }
+}

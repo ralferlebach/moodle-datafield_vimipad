@@ -22,3 +22,20 @@
 # tests/load seeds courses and users, enables web services and REST and mints a
 # token. A fine developer tool; it has no place on a production Moodle server.
 /tests/load         export-ignore
+/tests/playwright  export-ignore
+
+# Non-English language packs are starter translations for functional and
+# RTL/CJK testing, maintained via AMOS. Only English ships in the release ZIP.
+lang/de     export-ignore
+lang/nl     export-ignore
+lang/fr     export-ignore
+lang/da     export-ignore
+lang/no     export-ignore
+lang/sv     export-ignore
+lang/it     export-ignore
+lang/es     export-ignore
+lang/pt     export-ignore
+lang/uk     export-ignore
+lang/ja     export-ignore
+lang/zh_cn  export-ignore
+lang/ar     export-ignore
