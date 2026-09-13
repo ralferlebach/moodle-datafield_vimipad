@@ -80,7 +80,16 @@ test.describe('datafield_vimipad - Student stories', () => {
     // S2: the list view renders a stored map read-only.
     test('S2 - a stored map renders in the list view', async ({page}) => {
         await login(page, env.baseURL, env.student);
-        await page.goto(`${env.baseURL}${env.dataPath}&lang=en`);
+        // Address the database by instance id and ask for the list view
+        // explicitly. view.php can land on the single-entry view depending on
+        // leftover per-user state, and the field markup only appears where the
+        // list template is rendered.
+        await page.goto(`${env.baseURL}/mod/data/view.php?d=${env.dataId}&mode=list&lang=en`);
+
+        // The entry itself must be listed before the field markup can exist.
+        await expect(page.locator('.defaulttemplate-listentry, .datafield_vimipad').first())
+            .toBeAttached({timeout: 30_000});
+
         // The browse container is emitted by display_browse_field(); the editor
         // mounts into it asynchronously. Assert the container reaches the DOM.
         await expect(page.locator('.datafield_vimipad_browse, .datafield_vimipad_editor').first())
