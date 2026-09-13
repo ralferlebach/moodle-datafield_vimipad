@@ -89,6 +89,15 @@ $fieldid = (int) $DB->insert_record('data_fields', (object) [
     'param1' => 'conceptmap',
 ]);
 
+// Without templates mod_data renders no fields at all in list or single view,
+// so the browse markup would never appear. Generate the defaults now that the
+// field exists - this is what the UI does when a teacher first adds a field.
+require_once($CFG->dirroot . '/mod/data/lib.php');
+$datarecord = $DB->get_record('data', ['id' => $dataid], '*', MUST_EXIST);
+foreach (['listtemplate', 'singletemplate', 'addtemplate'] as $template) {
+    data_generate_default_template($datarecord, $template, 0, false, true);
+}
+
 // One entry with a map so the profile is locked and the list view has content.
 $map = json_encode([
     'profile' => 'conceptmap',
