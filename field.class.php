@@ -210,6 +210,69 @@ class data_field_vimipad extends data_field_base {
     }
 
     /**
+     * Render the search input for this field.
+     *
+     * mod_data calls this on every field when it builds the advanced search
+     * form, and data_field_base does not provide a default. Without it the
+     * database activity's browse page dies with "Call to undefined method".
+     * The stored value is the map JSON, whose node and relation labels are
+     * plain text, so a substring search over it finds maps by their labels.
+     *
+     * @param string $value The current search value.
+     * @return string HTML for the search input.
+     */
+    public function display_search_field($value = '') {
+        $fieldid = (int) $this->field->id;
+        return html_writer::label(
+            s($this->field->name),
+            'f_' . $fieldid,
+            true,
+            ['class' => 'accesshide']
+        ) . html_writer::empty_tag('input', [
+            'type' => 'text',
+            'class' => 'form-control',
+            'size' => 16,
+            'id' => 'f_' . $fieldid,
+            'name' => 'f_' . $fieldid,
+            'value' => s($value),
+        ]);
+    }
+
+    /**
+     * Read this field's search value from the request.
+     *
+     * @param array|null $defaults Default values keyed by parameter name.
+     * @return string The submitted search term.
+     */
+    public function parse_search_field($defaults = null) {
+        $param = 'f_' . (int) $this->field->id;
+        if (empty($defaults[$param])) {
+            $defaults = [$param => ''];
+        }
+        return optional_param($param, $defaults[$param], PARAM_NOTAGS);
+    }
+
+    /**
+     * Build the SQL that matches entries against the search term.
+     *
+     * @param string $tablealias Alias of the data_content table.
+     * @param string $value The search term.
+     * @return array An array of the SQL fragment and its named parameters.
+     */
+    public function generate_sql($tablealias, $value) {
+        global $DB;
+
+        static $i = 0;
+        $i++;
+        $name = 'df_vimipad_' . $i;
+        $like = $DB->sql_like("{$tablealias}.content", ":{$name}", false);
+        return [
+            " ({$tablealias}.fieldid = " . (int) $this->field->id . " AND {$like}) ",
+            [$name => '%' . $value . '%'],
+        ];
+    }
+
+    /**
      * Render the stored value when browsing entries.
      *
      * @param int $recordid The record ID.
