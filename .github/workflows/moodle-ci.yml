@@ -25,7 +25,7 @@ env:
   # The mod_vimipad dependency that provides the public API this plugin uses.
   # Must be at a version >= the one pinned in this plugin's version.php.
   VIMIPAD_REPO: ralferlebach/moodle-mod_vimipad
-  VIMIPAD_REF: development
+  VIMIPAD_REF: main
 
 jobs:
 

@@ -42,13 +42,24 @@ test.describe('datafield_vimipad - Teacher stories', () => {
         // The profile select may be named param1; pick a different profile if it
         // is offered, then save, and expect the lock message.
         const profile = page.locator('select[name="param1"]');
+        // The field edit form may render the profile as a select; if so, changing
+        // it to a different profile with entries present must be refused.
         if (await profile.count() > 0) {
-            const options = await profile.locator('option').count();
-            if (options > 1) {
-                await profile.selectOption({index: 1});
-                await page.getByRole('button', {name: /Save changes|Save/i}).first().click();
-                await expect(page.getByText(/profile cannot be changed|Diagrammprofil/i).first())
-                    .toBeVisible({timeout: 20_000});
+            await expect(profile.first()).toBeVisible({timeout: 15_000});
+            const options = profile.locator('option');
+            if (await options.count() > 1) {
+                // Choose whichever profile is not currently selected.
+                const current = await profile.inputValue();
+                const values: string[] = await options.evaluateAll(
+                    (els) => els.map((el) => (el as HTMLOptionElement).value)
+                );
+                const target = values.find((v) => v && v !== current);
+                if (target) {
+                    await profile.selectOption(target);
+                    await page.getByRole('button', {name: /Save changes|Save/i}).first().click();
+                    await expect(page.getByText(/profile cannot be changed|Diagrammprofil/i).first())
+                        .toBeVisible({timeout: 20_000});
+                }
             }
         }
     });

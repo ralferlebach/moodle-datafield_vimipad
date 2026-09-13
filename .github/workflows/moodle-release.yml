@@ -41,7 +41,7 @@ env:
   # Development runs float on mod_vimipad development. A release/tag run must pin
   # this to an immutable tag or SHA so the qualified dependency is reproducible;
   # override it via the workflow input or the VIMIPAD_RELEASE_REF variable.
-  VIMIPAD_REF: ${{ github.event.inputs.vimipad_ref || vars.VIMIPAD_RELEASE_REF || 'development' }}
+  VIMIPAD_REF: ${{ github.event.inputs.vimipad_ref || vars.VIMIPAD_RELEASE_REF || 'main' }}
 
 jobs:
 
@@ -100,7 +100,7 @@ jobs:
           echo "Qualified against mod_vimipad ${{ env.VIMIPAD_REF }} -> $SHA"
           echo "mod_vimipad ref: ${{ env.VIMIPAD_REF }}"  >> "$GITHUB_STEP_SUMMARY"
           echo "mod_vimipad SHA: $SHA"                    >> "$GITHUB_STEP_SUMMARY"
-          if [ "${{ env.VIMIPAD_REF }}" = "development" ]; then
+          if [ "${{ env.VIMIPAD_REF }}" = "development" ] || [ "${{ env.VIMIPAD_REF }}" = "main" ]; then
             echo "::warning::This run qualifies against the moving development branch; a release must pin an immutable tag or SHA."
           fi
 
@@ -204,7 +204,7 @@ jobs:
           echo "Qualified against mod_vimipad ${{ env.VIMIPAD_REF }} -> $SHA"
           echo "mod_vimipad ref: ${{ env.VIMIPAD_REF }}"  >> "$GITHUB_STEP_SUMMARY"
           echo "mod_vimipad SHA: $SHA"                    >> "$GITHUB_STEP_SUMMARY"
-          if [ "${{ env.VIMIPAD_REF }}" = "development" ]; then
+          if [ "${{ env.VIMIPAD_REF }}" = "development" ] || [ "${{ env.VIMIPAD_REF }}" = "main" ]; then
             echo "::warning::This run qualifies against the moving development branch; a release must pin an immutable tag or SHA."
           fi
 

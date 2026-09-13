@@ -31,3 +31,17 @@ site lives elsewhere.
 `tests/playwright` is `export-ignore` in `.gitattributes`, so it never ships
 in a release ZIP. `node_modules`, `test-results`, `playwright-report` and the
 seeded `.env` are gitignored.
+
+
+## Dependency ordering (important for CI)
+
+This plugin requires a specific mod_vimipad build (see `version.php`,
+`$plugin->dependencies`). The Playwright workflow clones mod_vimipad from
+`VIMIPAD_REF` (default `main`) and installs it alongside. **The workflow
+only succeeds once the mod_vimipad branch or ref it pulls actually meets that
+version requirement** - otherwise Moodle stops at "Dependencies check failed" and
+no test runs.
+
+For a release-candidate run, either merge the matching mod_vimipad first, or pin
+`VIMIPAD_REF` (workflow input or the `VIMIPAD_REF` variable) to a tag/SHA that
+provides the required build.

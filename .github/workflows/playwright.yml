@@ -32,6 +32,11 @@ jobs:
       MOODLE_BRANCH: MOODLE_405_STABLE
       DB: pgsql
       MOODLE_WWWROOT: http://localhost:8000
+      # mod_vimipad ref this plugin is qualified against. The satellites require a
+      # specific mod_vimipad build (see version.php), so a Playwright run must use
+      # a mod_vimipad that meets that requirement. Default is development; pin an
+      # immutable tag or SHA (or set the VIMIPAD_REF variable) for a release run.
+      VIMIPAD_REF: ${{ github.event.inputs.vimipad_ref || vars.VIMIPAD_REF || 'main' }}
 
     steps:
       - name: Check out plugin
@@ -59,7 +64,7 @@ jobs:
           cp -a plugin moodle/mod/data/field/vimipad
           rm -rf moodle/mod/data/field/vimipad/.git
           # This plugin depends on mod_vimipad; clone it alongside.
-          git clone --depth 1 --branch development https://github.com/ralferlebach/moodle-mod_vimipad.git /tmp/dep_vimipad
+          git clone --depth 1 --branch "$VIMIPAD_REF" https://github.com/ralferlebach/moodle-mod_vimipad.git /tmp/dep_vimipad
           cp -a /tmp/dep_vimipad moodle/mod/vimipad
           rm -rf moodle/mod/vimipad/.git
 
