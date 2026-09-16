@@ -9,7 +9,20 @@ semantic-ish plain patch numbering.
 First release candidate. Maturity raised to MATURITY_RC.
 
 
+
+### Fixed
+- The database activity's browse page died with "Call to undefined method
+  data_field_vimipad::display_search_field()" whenever a ViMi Pad field was
+  present. data_field_base provides no default for the search API, but mod_data
+  calls it on every field when building the search form. display_search_field(),
+  parse_search_field() and generate_sql() are now implemented; search matches the
+  map's node and relation labels.
+
 ### Added
+- PHPUnit tests (tests/search_contract_test.php) and Behat scenarios
+  (tests/behat/browse.feature) that exercise the browse and search paths through
+  mod_data itself. The earlier tests only called the plugin directly, which is
+  why this regression went unnoticed.
 - Playwright user-story suite (Teacher, Student) with a seed, a workflow and a
   video recorded on every run. See tests/playwright.
 - Moodle 5.1 in development and release CI.
