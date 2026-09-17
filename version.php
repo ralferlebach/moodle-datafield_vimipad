@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'datafield_vimipad';
-$plugin->version      = 2026091102;
+$plugin->version      = 2026091103;
 $plugin->requires     = 2024100700;   // Moodle 4.5.0 — hard minimum, mirrors mod_vimipad.
 $plugin->supported    = [405, 502];   // Tested on Moodle 4.5–5.2, like the activity it depends on.
 $plugin->maturity     = MATURITY_RC;

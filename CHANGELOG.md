@@ -10,6 +10,12 @@ First release candidate. Maturity raised to MATURITY_RC.
 
 
 
+
+### Added
+- PHPUnit privacy tests (tests/privacy_provider_test.php). The plugin declared a
+  privacy provider but had no test for it, so a broken reason string or a
+  mismatched provider signature would only have surfaced when an administrator
+  actually ran a data subject request.
 ### Fixed
 - The database activity's browse page died with "Call to undefined method
   data_field_vimipad::display_search_field()" whenever a ViMi Pad field was
