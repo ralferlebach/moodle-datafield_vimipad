@@ -183,7 +183,7 @@ jobs:
           - { moodle: MOODLE_503_STABLE, php: '8.2' }
     services:
       mariadb:
-        image: mariadb:10.11
+        image: ${{ matrix.moodle == 'MOODLE_503_STABLE' && 'mariadb:11.4' || 'mariadb:10.11' }}
         env:
           MYSQL_ROOT_PASSWORD: root
         ports: ['3306:3306']
@@ -191,7 +191,7 @@ jobs:
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s --health-retries=10
       pgsql:
-        image: postgres:16
+        image: ${{ matrix.moodle == 'MOODLE_503_STABLE' && 'postgres:17' || 'postgres:16' }}
         env:
           POSTGRES_USER:     moodle
           POSTGRES_PASSWORD: moodle
@@ -267,7 +267,7 @@ jobs:
           - { moodle: MOODLE_503_STABLE, php: '8.3' }
     services:
       mariadb:
-        image: mariadb:10.11
+        image: ${{ matrix.moodle == 'MOODLE_503_STABLE' && 'mariadb:11.4' || 'mariadb:10.11' }}
         env:
           MYSQL_ROOT_PASSWORD: root
         ports: ['3306:3306']

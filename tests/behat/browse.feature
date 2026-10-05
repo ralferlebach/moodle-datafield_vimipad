@@ -41,11 +41,20 @@ Feature: Browse database entries that contain a ViMi Pad field
     And I should not see "Call to undefined method"
     And I should not see "Exception"
 
-  Scenario: The advanced search form builds with a ViMi Pad field present
+  # mod_data only offers advanced search once the database holds entries, and
+  # the form is revealed by JavaScript, so both are needed to reach it - as in
+  # core's own mod/data/tests/behat/advanced_search.feature.
+  @javascript
+  Scenario: The advanced search form includes the ViMi Pad field
+    Given the following "mod_data > entries" exist:
+      | database | user     | Map                                                                               |
+      | data1    | student1 | {"profile":"conceptmap","nodes":[{"stableid":"a","label":"Water"}],"relations":[]} |
     When I am on the "Map bank" "data activity" page logged in as teacher1
-    And I set the field "Advanced search" to "1"
-    Then I should not see "Call to undefined method"
-    And I should not see "Exception"
+    And I click on "Advanced search" "checkbox"
+    # The search input is rendered by display_search_field(), the very method
+    # whose absence used to take this page down.
+    Then I should see "Map" in the "data_adv_form" "region"
+    And I should not see "Call to undefined method"
 
   @javascript
   Scenario: A submitted map is listed in the browse view
