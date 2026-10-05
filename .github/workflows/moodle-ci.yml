@@ -167,7 +167,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle: [MOODLE_405_STABLE, MOODLE_500_STABLE, MOODLE_501_STABLE, MOODLE_502_STABLE]
+        moodle: [MOODLE_405_STABLE, MOODLE_500_STABLE, MOODLE_501_STABLE, MOODLE_502_STABLE, MOODLE_503_STABLE]
         php: ['8.1', '8.2', '8.3']
         db:
           - { engine: mariadb, type: mariadb, port: 3306, user: root,   pass: root   }
@@ -178,6 +178,9 @@ jobs:
           - { moodle: MOODLE_501_STABLE, php: '8.1' }
           - { moodle: MOODLE_502_STABLE, php: '8.1' }
           - { moodle: MOODLE_502_STABLE, php: '8.2' }
+          # Moodle 5.3 requires PHP 8.3 (composer.json: php >= 8.3.0).
+          - { moodle: MOODLE_503_STABLE, php: '8.1' }
+          - { moodle: MOODLE_503_STABLE, php: '8.2' }
     services:
       mariadb:
         image: mariadb:10.11
@@ -261,6 +264,7 @@ jobs:
           - { moodle: MOODLE_500_STABLE, php: '8.2' }
           - { moodle: MOODLE_501_STABLE, php: '8.3' }
           - { moodle: MOODLE_502_STABLE, php: '8.3' }
+          - { moodle: MOODLE_503_STABLE, php: '8.3' }
     services:
       mariadb:
         image: mariadb:10.11
