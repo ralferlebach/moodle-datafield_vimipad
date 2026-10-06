@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'datafield_vimipad';
-$plugin->version      = 2026100500;
+$plugin->version      = 2026100600;
 $plugin->requires     = 2024100700;   // Moodle 4.5.0 — hard minimum, mirrors mod_vimipad.
 $plugin->supported    = [405, 503];   // Tested on Moodle 4.5-5.3.
 $plugin->maturity     = MATURITY_STABLE;
@@ -37,5 +37,5 @@ $plugin->release      = '1.0.0';
 // a field-value adapter. The dependency is declared at the build that
 // introduced the public map-value API this field validates its values with.
 $plugin->dependencies = [
-    'mod_vimipad' => 2026100500,
+    'mod_vimipad' => 2026100600,
 ];
