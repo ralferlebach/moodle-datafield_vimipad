@@ -44,7 +44,15 @@ Feature: Browse database entries that contain a ViMi Pad field
   # mod_data only offers advanced search once the database holds entries, and
   # the form is revealed by JavaScript, so both are needed to reach it - as in
   # core's own mod/data/tests/behat/advanced_search.feature.
-  @javascript
+  # @data_listview_js: on Moodle 5.3 every JavaScript page of mod_data's list
+  # view times out in Behat with core/form-autocomplete, core/page_global and
+  # core/utility pending - the modules 5.3 loads through its ESM bridge. A control
+  # run with a database WITHOUT a ViMi Pad field failed identically, so the cause
+  # lies in Moodle 5.3, not in this plugin. The CI excludes the tag on 5.3 only;
+  # the server-side regression this feature guards (display_search_field) is still
+  # covered there by the non-JavaScript scenarios above. Drop the exclusion in the
+  # workflows once 5.3 serves the list view under Behat again.
+  @javascript @data_listview_js
   Scenario: The advanced search form includes the ViMi Pad field
     Given the following "mod_data > entries" exist:
       | database | user     | Map                                                                               |
@@ -56,7 +64,7 @@ Feature: Browse database entries that contain a ViMi Pad field
     Then I should see "Map" in the "data_adv_form" "region"
     And I should not see "Call to undefined method"
 
-  @javascript
+  @javascript @data_listview_js
   Scenario: A submitted map is listed in the browse view
     Given the following "mod_data > entries" exist:
       | database | user     | Map                                                                                   |
@@ -64,23 +72,3 @@ Feature: Browse database entries that contain a ViMi Pad field
     When I am on the "Map bank" "data activity" page logged in as student1
     Then ".datafield_vimipad" "css_element" should exist
     And I should not see "Exception"
-
-  # Control for the Moodle 5.3 investigation. On 5.3 the two JavaScript
-  # scenarios above time out with core/form-autocomplete, core/page_global and
-  # core/utility still pending - modules 5.3 now loads through its ESM bridge
-  # (core/esm!). This page is the same list view with tags and advanced search,
-  # but in a database WITHOUT a ViMi Pad field. If it hangs as well, the cause is
-  # in Moodle 5.3 core, not in this plugin; if it passes, the field is involved.
-  @javascript
-  Scenario: Control - the list view of a database without a ViMi Pad field loads
-    Given the following "activities" exist:
-      | activity | name       | course | idnumber |
-      | data     | Plain bank | C1     | data2    |
-    And the following "mod_data > fields" exist:
-      | database | type | name  | description |
-      | data2    | text | Title | Plain text  |
-    And the following "mod_data > entries" exist:
-      | database | user     | Title       |
-      | data2    | student1 | Plain entry |
-    When I am on the "Plain bank" "data activity" page logged in as teacher1
-    Then I should see "Plain entry"

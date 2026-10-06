@@ -331,12 +331,15 @@ jobs:
       - name: Record Behat failures to disk
         run: moodle-plugin-ci add-config '$CFG->behat_faildump_path = $CFG->dataroot . "/behat_dump"; if (!is_dir($CFG->behat_faildump_path)) { @mkdir($CFG->behat_faildump_path, 0777, true); }'
 
+      # On Moodle 5.3 the list view of mod_data times out under Behat
+      # even without this field (see @data_listview_js in browse.feature),
+      # so those scenarios are excluded there and nowhere else.
       - name: Behat - plugin scenarios
         run: |
           moodle-plugin-ci behat \
             --dump \
             --profile chrome \
-            --tags "@datafield_vimipad&&~@broken" \
+            --tags "@datafield_vimipad&&~@broken${{ matrix.moodle == 'MOODLE_503_STABLE' && '&&~@data_listview_js' || '' }}" \
             --start-servers
 
       # A Behat failure in the browser leaves screenshots and the page HTML
