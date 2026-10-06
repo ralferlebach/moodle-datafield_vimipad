@@ -71,7 +71,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
         ports: ['3306:3306']
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd="mariadb-admin ping --silent || mysqladmin ping --silent"
           --health-interval=10s --health-retries=10
     steps:
       - name: Checkout plugin
@@ -188,7 +188,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
         ports: ['3306:3306']
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd="mariadb-admin ping --silent || mysqladmin ping --silent"
           --health-interval=10s --health-retries=10
       pgsql:
         image: ${{ matrix.moodle == 'MOODLE_503_STABLE' && 'postgres:17' || 'postgres:16' }}
@@ -272,7 +272,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
         ports: ['3306:3306']
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd="mariadb-admin ping --silent || mysqladmin ping --silent"
           --health-interval=10s --health-retries=10
     steps:
       - name: Checkout plugin
