@@ -9,6 +9,21 @@ semantic-ish plain patch numbering.
 ## Unreleased
 
 ### Added
+- Browser stories for editing a map in an entry: two concepts added through
+  the form both appear, are in the submitted value and come back after saving
+  (S3); a concept can be dragged (S4); Arrange keeps every concept on screen
+  (S5). The earlier stories only checked that the editor appears.
+
+### Fixed
+- The field's icon in mod_data's "Create a field" menu. Moodle 5.0 and later
+  take it from the field's own pix/icon, which this plugin ships. Moodle 4.5
+  asks for an image in mod_data's own pix folder instead; a plugin may not
+  supply one there, and mapping it through get_fontawesome_icon_map() is
+  refused by core because a plugin may only map its own icons. The README
+  describes the 4.5 site customisation that adds it, and a test renders the
+  real menu and checks the right route on each version.
+
+### Added
 - Plugin logo added as pix/datafield_vimipad-icon-color-200.png and .svg. The
   monochrome icon now matches mod_vimipad's: pix/monologo.svg, and pix/icon.svg
   with the same drawing, because mod_data shows a field type's "icon" - the

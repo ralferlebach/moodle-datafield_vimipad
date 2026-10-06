@@ -95,6 +95,12 @@ concept it contains rather than only by its title.
 **Pitfall:** the diagram form is fixed once maps exist. Plan which form fits the collection before
 participants start, or add a second field rather than converting the first.
 
+**Pitfall:** on Moodle 4.5 the field has no icon in the Database activity's "Create a field" menu - the
+entry shows its name twice. Moodle 4.5 looks for that icon in mod_data's own pix folder rather than in the
+field type, and a plugin may not supply files there; Moodle 5.0 and later use the field's own icon. On a 4.5
+site, an administrator can add it as a site customisation by copying `pix/icon.svg` from this plugin to
+`$CFG->dataroot/pix_plugins/mod/data/field/vimipad.svg` and purging all caches.
+
 **Pitfall:** a Database activity needs its templates generated before fields appear in the list view.
 Moodle does this when you add the first field through the interface; a database built by script may
 need the templates generated explicitly.

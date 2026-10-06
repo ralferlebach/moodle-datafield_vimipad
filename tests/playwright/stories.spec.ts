@@ -19,7 +19,7 @@
  * in ViMi_User_Stories.md. Requires a seeded, running site (see seed.php).
  */
 
-import {test, expect} from '@playwright/test';
+import {test, expect, Page} from '@playwright/test';
 import {readEnv, login} from './support/env';
 
 const env = readEnv();
@@ -94,5 +94,111 @@ test.describe('datafield_vimipad - Student stories', () => {
         // mounts into it asynchronously. Assert the container reaches the DOM.
         await expect(page.locator('.datafield_vimipad_browse, .datafield_vimipad_editor').first())
             .toBeAttached({timeout: 30_000});
+    });
+});
+
+/**
+ * Add a concept through the editor's add form - the keyboard route a learner
+ * uses in an entry form.
+ *
+ * @param page The page.
+ * @param label The concept label.
+ */
+async function addConcept(page: Page, label: string): Promise<void> {
+    const group = page.getByRole('group', {name: /Add concept/i});
+    await group.getByLabel(/Concept label/i).fill(label);
+    await group.getByRole('button', {name: /^Add$/}).click();
+}
+
+/**
+ * The canvas node showing a label.
+ *
+ * @param page The page.
+ * @param label The label.
+ * @returns The node locator.
+ */
+function node(page: Page, label: string) {
+    return page.locator('.vimipad-canvas-node', {hasText: label}).first();
+}
+
+/**
+ * Open a fresh entry form and wait until the editor can take input.
+ *
+ * @param page The page.
+ */
+async function openEntryForm(page: Page): Promise<void> {
+    await login(page, env.baseURL, env.student);
+    await page.goto(`${env.baseURL}/mod/data/edit.php?d=${env.dataId}&lang=en`);
+    await expect(page.getByRole('group', {name: /Add concept/i})).toBeVisible({timeout: 30_000});
+}
+
+test.describe('datafield_vimipad - editing a map in an entry', () => {
+    // A learner builds a map through the form, saves the entry, and finds the
+    // map again. Guards the regression where the value transport minted no ids:
+    // the first node showed only as a preview, the second never appeared, and
+    // the entry was saved with an empty map.
+    test('S3 - two concepts both appear, are saved and come back', async ({page}) => {
+        await openEntryForm(page);
+
+        await addConcept(page, 'Evaporation');
+        await addConcept(page, 'Condensation');
+        await expect(node(page, 'Evaporation')).toBeVisible();
+        await expect(node(page, 'Condensation')).toBeVisible();
+
+        // What the form will submit: the hidden field must already hold both.
+        // display_add_field() names the pair <field>_editor and <field>_value.
+        const editorId = await page.locator('.datafield_vimipad_editor').first().getAttribute('id');
+        const value = await page.locator(`#${editorId!.replace(/_editor$/, '_value')}`).inputValue();
+        const saved = JSON.parse(value);
+        expect(saved.nodes.map((n: {label: string}) => n.label).sort()).toEqual(['Condensation', 'Evaporation']);
+        for (const n of saved.nodes) {
+            expect(n.stableid).toMatch(/^node_[0-9a-f]{12}$/);
+        }
+
+        await page.getByRole('button', {name: 'Save', exact: true}).click();
+
+        // The saved entry shows the same two concepts read-only.
+        await expect(node(page, 'Evaporation')).toBeVisible({timeout: 30_000});
+        await expect(node(page, 'Condensation')).toBeVisible();
+    });
+
+    // Guards the regression where every lock request was answered with an
+    // empty object, read as "refused", so each drag was dropped at once.
+    test('S4 - a concept can be dragged', async ({page}) => {
+        await openEntryForm(page);
+        await addConcept(page, 'Precipitation');
+        const target = node(page, 'Precipitation');
+        await expect(target).toBeVisible();
+
+        const before = (await target.boundingBox())!;
+        await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2);
+        await page.mouse.down();
+        await page.mouse.move(before.x + before.width / 2 + 160, before.y + before.height / 2 + 60, {steps: 12});
+        await page.mouse.up();
+
+        const after = (await target.boundingBox())!;
+        expect(after.x - before.x).toBeGreaterThan(80);
+    });
+
+    // Guards the regression where Arrange started a map without stored
+    // positions at the canvas origin and pushed it off the canvas.
+    test('S5 - Arrange keeps every concept on screen', async ({page}) => {
+        await openEntryForm(page);
+        for (const label of ['Sun', 'Ocean', 'Cloud', 'River']) {
+            await addConcept(page, label);
+        }
+        await expect(node(page, 'River')).toBeVisible();
+
+        await page.getByRole('button', {name: /Re-?arrange layout/i}).first().click();
+
+        const canvas = (await page.locator('svg.vimipad-canvas').first().boundingBox())!;
+        for (const label of ['Sun', 'Ocean', 'Cloud', 'River']) {
+            const box = await node(page, label).boundingBox();
+            expect(box, `${label} must still be drawn`).not.toBeNull();
+            expect(box!.x + box!.width / 2).toBeGreaterThan(canvas.x);
+            expect(box!.x + box!.width / 2).toBeLessThan(canvas.x + canvas.width);
+            expect(box!.y + box!.height / 2).toBeGreaterThan(canvas.y);
+            expect(box!.y + box!.height / 2).toBeLessThan(canvas.y + canvas.height);
+        }
     });
 });
