@@ -64,3 +64,23 @@ Feature: Browse database entries that contain a ViMi Pad field
     When I am on the "Map bank" "data activity" page logged in as student1
     Then ".datafield_vimipad" "css_element" should exist
     And I should not see "Exception"
+
+  # Control for the Moodle 5.3 investigation. On 5.3 the two JavaScript
+  # scenarios above time out with core/form-autocomplete, core/page_global and
+  # core/utility still pending - modules 5.3 now loads through its ESM bridge
+  # (core/esm!). This page is the same list view with tags and advanced search,
+  # but in a database WITHOUT a ViMi Pad field. If it hangs as well, the cause is
+  # in Moodle 5.3 core, not in this plugin; if it passes, the field is involved.
+  @javascript
+  Scenario: Control - the list view of a database without a ViMi Pad field loads
+    Given the following "activities" exist:
+      | activity | name       | course | idnumber |
+      | data     | Plain bank | C1     | data2    |
+    And the following "mod_data > fields" exist:
+      | database | type | name  | description |
+      | data2    | text | Title | Plain text  |
+    And the following "mod_data > entries" exist:
+      | database | user     | Title       |
+      | data2    | student1 | Plain entry |
+    When I am on the "Plain bank" "data activity" page logged in as teacher1
+    Then I should see "Plain entry"

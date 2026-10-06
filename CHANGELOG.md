@@ -5,6 +5,18 @@ All notable changes to datafield_vimipad are documented here. The format follows
 semantic-ish plain patch numbering.
 
 
+
+## Unreleased
+
+### Added
+- Plugin logo added as pix/datafield_vimipad-icon-color-200.png and .svg. The
+  monochrome icon now matches mod_vimipad's: pix/monologo.svg, and pix/icon.svg
+  with the same drawing, because mod_data shows a field type's "icon" - the
+  monologo fallback applies to activity modules only.
+- A control Behat scenario for the Moodle 5.3 investigation: the same list view
+  in a database without a ViMi Pad field, to tell a core 5.3 problem apart from
+  one caused by this field.
+
 ## 1.0.0 (2026-10-05)
 
 ### Changed
